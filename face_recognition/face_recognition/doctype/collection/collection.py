@@ -70,6 +70,10 @@ class Collection(Document):
 
             response = requests.post(endpoint, headers=headers, files=files)
             response.raise_for_status()
+            
+            # After successful enrollment, sync faces from the server
+            self.sync_faces_from_server()
+            
             return response.json()
         except requests.exceptions.RequestException as e:
             frappe.throw(f"Error connecting to face recognition server: {e}")
