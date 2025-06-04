@@ -41,15 +41,18 @@ class Collection(Document):
             frappe.throw(f"An unexpected error occurred during face synchronization: {e}")
 
     @frappe.whitelist()
-    def enroll_face_on_server(self, person_name, image_file_id):
+    def enroll_face_on_server(self, person_name, image_file_url):
         server_url, api_key = self.get_server_settings()
         collection_name = self.collection_name
         endpoint = f"{server_url}/enroll_face/{collection_name}"
         headers = {"X-API-Key": api_key}
 
         try:
-            # Get the file content from Frappe
-            file_doc = frappe.get_doc("File", image_file_id)
+            file_doc_name = get_latest_file_doc_name_by_url(image_file_url)
+            if not file_doc_name:
+                frappe.throw(f"File not found for URL: {image_file_url}")
+
+            file_doc = frappe.get_doc("File", file_doc_name)
             file_content = frappe.get_file(file_doc.file_url)
 
             files = {
@@ -66,15 +69,18 @@ class Collection(Document):
             frappe.throw(f"An unexpected error occurred during face enrollment: {e}")
 
     @frappe.whitelist()
-    def recognize_face_on_server(self, image_file_id):
+    def recognize_face_on_server(self, image_file_url):
         server_url, api_key = self.get_server_settings()
         collection_name = self.collection_name
         endpoint = f"{server_url}/recognize_face/{collection_name}"
         headers = {"X-API-Key": api_key}
 
         try:
-            # Get the file content from Frappe
-            file_doc = frappe.get_doc("File", image_file_id)
+            file_doc_name = get_latest_file_doc_name_by_url(image_file_url)
+            if not file_doc_name:
+                frappe.throw(f"File not found for URL: {image_file_url}")
+
+            file_doc = frappe.get_doc("File", file_doc_name)
             file_content = frappe.get_file(file_doc.file_url)
 
             files = {"file": (file_doc.file_name, file_content, file_doc.file_type)}
@@ -86,3 +92,29 @@ class Collection(Document):
             frappe.throw(f"Error connecting to face recognition server: {e}")
         except Exception as e:
             frappe.throw(f"An unexpected error occurred during face recognition: {e}")
+
+@frappe.whitelist()
+def get_latest_file_doc_name_by_url(file_url):
+    """
+    Finds the most recently created File document matching the given file_url.
+
+    :param file_url: The file_url from the Attach field.
+    :return: The name (hash) of the File document or None.
+    """
+    if not file_url:
+        frappe.log_error("get_latest_file_doc_name_by_url called with empty file_url", "Face Recognition")
+        return None
+
+    try:
+        file_doc_name = frappe.db.get_value(
+            "File",
+            filters={"file_url": file_url},
+            fieldname="name",
+            order_by="creation desc",
+        )
+        if not file_doc_name:
+            frappe.log_error(f"No File found for file_url: {file_url}", "Face Recognition")
+        return file_doc_name
+    except Exception as e:
+        frappe.log_error(f"Error fetching File for url {file_url}: {e}", "Face Recognition")
+        return None

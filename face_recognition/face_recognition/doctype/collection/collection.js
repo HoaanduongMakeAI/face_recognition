@@ -37,7 +37,7 @@ frappe.ui.form.on('Collection', {
                     d.hide();
                     frm.call('enroll_face_on_server', {
                         person_name: values.person_name,
-                        image_file_id: values.image_file
+                        image_file_url: values.image_file
                     }, function(r) {
                         if (r.message) {
                             frappe.msgprint(r.message);
@@ -69,7 +69,7 @@ frappe.ui.form.on('Collection', {
                     }
                     d.hide();
                     frm.call('recognize_face_on_server', {
-                        image_file_id: values.image_file
+                        image_file_url: values.image_file
                     }, function(r) {
                         if (r.message) {
                             let recognized_faces = r.message.recognized_faces;
