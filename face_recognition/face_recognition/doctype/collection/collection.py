@@ -8,7 +8,7 @@ class Collection(Document):
         settings = frappe.get_single("Face Recognition Setting")
         if not settings.server_url or not settings.api_key:
             frappe.throw("Face Recognition Server URL and API Key must be set in Face Recognition Setting.")
-        return settings.server_url, settings.api_key
+        return settings.server_url, settings.get_password("api_key")
 
     @frappe.whitelist()
     def sync_faces_from_server(self):
