@@ -136,15 +136,12 @@ frappe.ui.form.on('Collection', {
                                             faceListDiv.innerHTML = list_html;
                                         };
                                         
-                                        // If the image is already loaded (e.g., from cache), trigger onload manually
-                                        if (img.complete) {
-                                            img.onload();
-                                        } else {
-                                            // If not complete, handle potential errors during loading
-                                            img.onerror = () => {
-                                                frappe.msgprint(__('Failed to load image for drawing bounding boxes. Please ensure the image URL is accessible.'));
-                                            };
-                                        }
+                                        img.onerror = () => {
+                                            frappe.msgprint(__('Failed to load image for drawing bounding boxes. Please ensure the image URL is accessible.'));
+                                        };
+
+                                        // Explicitly set the src to trigger load event after handlers are attached
+                                        img.src = image_url;
                                     }
                                 });
                             } else {
