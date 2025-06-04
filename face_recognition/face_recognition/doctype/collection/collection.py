@@ -2,6 +2,8 @@ import frappe
 from frappe.model.document import Document
 import requests
 import json
+import os
+from frappe.utils import get_files_path
 
 class Collection(Document):
     def get_server_settings(self):
@@ -53,7 +55,13 @@ class Collection(Document):
                 frappe.throw(f"File not found for URL: {image_file_url}")
 
             file_doc = frappe.get_doc("File", file_doc_name)
-            file_content = frappe.get_file(file_doc.file_url)
+            file_path_abs = get_files_path(file_doc.file_name, is_private=file_doc.is_private)
+            
+            if not os.path.exists(file_path_abs):
+                frappe.throw(f"Local file not found at path: {file_path_abs}")
+
+            with open(file_path_abs, "rb") as f:
+                file_content = f.read()
 
             files = {
                 "file": (file_doc.file_name, file_content, file_doc.file_type),
@@ -81,7 +89,13 @@ class Collection(Document):
                 frappe.throw(f"File not found for URL: {image_file_url}")
 
             file_doc = frappe.get_doc("File", file_doc_name)
-            file_content = frappe.get_file(file_doc.file_url)
+            file_path_abs = get_files_path(file_doc.file_name, is_private=file_doc.is_private)
+
+            if not os.path.exists(file_path_abs):
+                frappe.throw(f"Local file not found at path: {file_path_abs}")
+
+            with open(file_path_abs, "rb") as f:
+                file_content = f.read()
 
             files = {"file": (file_doc.file_name, file_content, file_doc.file_type)}
 
