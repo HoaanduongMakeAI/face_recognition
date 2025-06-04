@@ -91,50 +91,70 @@ frappe.ui.form.on('Collection', {
                                     title: __('Face Recognition Result'),
                                     message: message_html,
                                     as_html: true,
-                                    on_page_show: () => {
-                                        const img = document.getElementById('face_recognition_image');
-                                        const canvas = document.getElementById('face_recognition_canvas');
-                                        const ctx = canvas.getContext('2d');
-                                        const faceListDiv = document.getElementById('recognized_faces_list');
-
-                                        console.log ("Executing drawing logic directly");
-                                        // Set canvas dimensions to match the image's rendered dimensions
-                                        canvas.width = img.clientWidth;
-                                        canvas.height = img.clientHeight;
-
-                                        // Draw the image onto the canvas, scaled to fit the rendered size
-                                        ctx.drawImage(img, 0, 0, img.clientWidth, img.clientHeight);
-
-                                        // Calculate scaling factors
-                                        const scaleX = img.clientWidth / img.naturalWidth;
-                                        const scaleY = img.clientHeight / img.naturalHeight;
-
-                                        let list_html = "";
-                                        recognized_faces.forEach(face => {
-                                            // Scale bounding box coordinates
-                                            const [x1_orig, y1_orig, x2_orig, y2_orig] = face.bbox;
-                                            const x1 = x1_orig * scaleX;
-                                            const y1 = y1_orig * scaleY;
-                                            const x2 = x2_orig * scaleX;
-                                            const y2 = y2_orig * scaleY;
-                                            
-                                            // Draw bounding box
-                                            ctx.beginPath();
-                                            ctx.rect(x1, y1, x2 - x1, y2 - y1);
-                                            ctx.lineWidth = 2;
-                                            ctx.strokeStyle = 'red';
-                                            ctx.stroke();
-
-                                            // Draw text (name and similarity)
-                                            ctx.fillStyle = 'red';
-                                            ctx.font = 'bold 16px Arial'; // Make font bold for better visibility
-                                            ctx.fillText(`${face.name} (${(face.similarity * 100).toFixed(2)}%)`, x1, y1 > 20 ? y1 - 5 : y1 + 20);
-
-                                            list_html += `<p><strong>${__('Name')}:</strong> ${face.name}, <strong>${__('Similarity')}:</strong> ${(face.similarity * 100).toFixed(2)}%, <strong>${__('Bounding Box')}:</strong> [${x1_orig.toFixed(2)}, ${y1_orig.toFixed(2)}, ${x2_orig.toFixed(2)}, ${y2_orig.toFixed(2)}]</p>`;
-                                        });
-                                        faceListDiv.innerHTML = list_html;
-                                    }
                                 });
+
+                                // Use setTimeout to ensure the DOM elements are rendered before accessing them
+                                setTimeout(() => {
+                                    const img = document.getElementById('face_recognition_image');
+                                    const canvas = document.getElementById('face_recognition_canvas');
+                                    const ctx = canvas.getContext('2d');
+                                    const faceListDiv = document.getElementById('recognized_faces_list');
+
+                                    if (img && canvas && ctx && faceListDiv) {
+                                        img.onload = () => {
+                                            console.log ("img.onload triggered after setTimeout");
+                                            // Set canvas dimensions to match the image's rendered dimensions
+                                            canvas.width = img.clientWidth;
+                                            canvas.height = img.clientHeight;
+
+                                            // Draw the image onto the canvas, scaled to fit the rendered size
+                                            ctx.drawImage(img, 0, 0, img.clientWidth, img.clientHeight);
+
+                                            // Calculate scaling factors
+                                            const scaleX = img.clientWidth / img.naturalWidth;
+                                            const scaleY = img.clientHeight / img.naturalHeight;
+
+                                            let list_html = "";
+                                            recognized_faces.forEach(face => {
+                                                // Scale bounding box coordinates
+                                                const [x1_orig, y1_orig, x2_orig, y2_orig] = face.bbox;
+                                                const x1 = x1_orig * scaleX;
+                                                const y1 = y1_orig * scaleY;
+                                                const x2 = x2_orig * scaleX;
+                                                const y2 = y2_orig * scaleY;
+                                                
+                                                // Draw bounding box
+                                                ctx.beginPath();
+                                                ctx.rect(x1, y1, x2 - x1, y2 - y1);
+                                                ctx.lineWidth = 2;
+                                                ctx.strokeStyle = 'red';
+                                                ctx.stroke();
+
+                                                // Draw text (name and similarity)
+                                                ctx.fillStyle = 'red';
+                                                ctx.font = 'bold 16px Arial'; // Make font bold for better visibility
+                                                ctx.fillText(`${face.name} (${(face.similarity * 100).toFixed(2)}%)`, x1, y1 > 20 ? y1 - 5 : y1 + 20);
+
+                                                list_html += `<p><strong>${__('Name')}:</strong> ${face.name}, <strong>${__('Similarity')}:</strong> ${(face.similarity * 100).toFixed(2)}%, <strong>${__('Bounding Box')}:</strong> [${x1_orig.toFixed(2)}, ${y1_orig.toFixed(2)}, ${x2_orig.toFixed(2)}, ${y2_orig.toFixed(2)}]</p>`;
+                                            });
+                                            faceListDiv.innerHTML = list_html;
+                                        };
+                                        
+                                        img.onerror = () => {
+                                            frappe.msgprint(__('Failed to load image for drawing bounding boxes. Please ensure the image URL is accessible.'));
+                                        };
+
+                                        // Explicitly set the src to trigger load event after handlers are attached
+                                        img.src = image_url;
+
+                                        // If the image is already loaded (e.g., from cache), trigger onload manually
+                                        if (img.complete) {
+                                            img.onload();
+                                        }
+                                    } else {
+                                        console.error("Elements not found after setTimeout.");
+                                    }
+                                }, 100); // Small delay to allow DOM to render
                             } else {
                                 frappe.msgprint(__('No faces recognized.'));
                             }
