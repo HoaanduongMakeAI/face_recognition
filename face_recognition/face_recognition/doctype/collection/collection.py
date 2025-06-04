@@ -17,7 +17,7 @@ class Collection(Document):
         endpoint = f"{server_url}/list_faces/{collection_name}"
         headers = {"X-API-Key": api_key}
 
-        frappe.msgprint(f"{api_key}")
+        frappe.throw(f"{api_key}")
 
         try:
             response = requests.get(endpoint, headers=headers)
