@@ -17,6 +17,8 @@ class Collection(Document):
         endpoint = f"{server_url}/list_faces/{collection_name}"
         headers = {"X-API-Key": api_key}
 
+        frappe.msgprint(f"{api_key}")
+
         try:
             response = requests.get(endpoint, headers=headers)
             response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
