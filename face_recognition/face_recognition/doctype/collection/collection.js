@@ -98,31 +98,51 @@ frappe.ui.form.on('Collection', {
                                         const faceListDiv = document.getElementById('recognized_faces_list');
 
                                         img.onload = () => {
-                                            canvas.width = img.width;
-                                            canvas.height = img.height;
-                                            ctx.drawImage(img, 0, 0, img.width, img.height);
+                                            // Set canvas dimensions to match the image's rendered dimensions
+                                            canvas.width = img.clientWidth;
+                                            canvas.height = img.clientHeight;
+
+                                            // Draw the image onto the canvas, scaled to fit the rendered size
+                                            ctx.drawImage(img, 0, 0, img.clientWidth, img.clientHeight);
+
+                                            // Calculate scaling factors
+                                            const scaleX = img.clientWidth / img.naturalWidth;
+                                            const scaleY = img.clientHeight / img.naturalHeight;
 
                                             let list_html = "";
                                             recognized_faces.forEach(face => {
-                                                const [x1, y1, x2, y2] = face.bbox;
+                                                // Scale bounding box coordinates
+                                                const [x1_orig, y1_orig, x2_orig, y2_orig] = face.bbox;
+                                                const x1 = x1_orig * scaleX;
+                                                const y1 = y1_orig * scaleY;
+                                                const x2 = x2_orig * scaleX;
+                                                const y2 = y2_orig * scaleY;
                                                 
+                                                // Draw bounding box
                                                 ctx.beginPath();
                                                 ctx.rect(x1, y1, x2 - x1, y2 - y1);
                                                 ctx.lineWidth = 2;
                                                 ctx.strokeStyle = 'red';
                                                 ctx.stroke();
 
+                                                // Draw text (name and similarity)
                                                 ctx.fillStyle = 'red';
-                                                ctx.font = '16px Arial';
+                                                ctx.font = 'bold 16px Arial'; // Make font bold for better visibility
                                                 ctx.fillText(`${face.name} (${(face.similarity * 100).toFixed(2)}%)`, x1, y1 > 20 ? y1 - 5 : y1 + 20);
 
-                                                list_html += `<p><strong>${__('Name')}:</strong> ${face.name}, <strong>${__('Similarity')}:</strong> ${(face.similarity * 100).toFixed(2)}%</p>`;
+                                                list_html += `<p><strong>${__('Name')}:</strong> ${face.name}, <strong>${__('Similarity')}:</strong> ${(face.similarity * 100).toFixed(2)}%, <strong>${__('Bounding Box')}:</strong> [${x1_orig.toFixed(2)}, ${y1_orig.toFixed(2)}, ${x2_orig.toFixed(2)}, ${y2_orig.toFixed(2)}]</p>`;
                                             });
                                             faceListDiv.innerHTML = list_html;
                                         };
-                                        // If image is already loaded (e.g., from cache), trigger onload manually
+                                        
+                                        // If the image is already loaded (e.g., from cache), trigger onload manually
                                         if (img.complete) {
                                             img.onload();
+                                        } else {
+                                            // If not complete, handle potential errors during loading
+                                            img.onerror = () => {
+                                                frappe.msgprint(__('Failed to load image for drawing bounding boxes. Please ensure the image URL is accessible.'));
+                                            };
                                         }
                                     }
                                 });
