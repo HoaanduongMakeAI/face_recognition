@@ -97,10 +97,15 @@ frappe.ui.form.on('Collection', {
                                 setTimeout(() => {
                                     const img = document.getElementById('face_recognition_image');
                                     const canvas = document.getElementById('face_recognition_canvas');
-                                    const ctx = canvas.getContext('2d');
                                     const faceListDiv = document.getElementById('recognized_faces_list');
 
-                                    if (img && canvas && ctx && faceListDiv) {
+                                    if (img && canvas && faceListDiv) {
+                                        const ctx = canvas.getContext('2d');
+                                        if (!ctx) {
+                                            console.error("Failed to get 2D context for canvas.");
+                                            return;
+                                        }
+
                                         img.onload = () => {
                                             console.log ("img.onload triggered after setTimeout");
                                             // Set canvas dimensions to match the image's rendered dimensions
@@ -152,9 +157,9 @@ frappe.ui.form.on('Collection', {
                                             img.onload();
                                         }
                                     } else {
-                                        console.error("Elements not found after setTimeout.");
+                                        console.error("Elements not found after setTimeout. img:", img, "canvas:", canvas, "faceListDiv:", faceListDiv);
                                     }
-                                }, 100); // Small delay to allow DOM to render
+                                }, 1000); // Increased delay to allow DOM to render
                             } else {
                                 frappe.msgprint(__('No faces recognized.'));
                             }
