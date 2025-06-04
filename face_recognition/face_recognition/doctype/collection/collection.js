@@ -98,7 +98,7 @@ frappe.ui.form.on('Collection', {
                                         const faceListDiv = document.getElementById('recognized_faces_list');
 
                                         img.onload = () => {
-                                            frappe.msgprint("img.onload");
+                                            console.log ("img.onload");
                                             // Set canvas dimensions to match the image's rendered dimensions
                                             canvas.width = img.clientWidth;
                                             canvas.height = img.clientHeight;
