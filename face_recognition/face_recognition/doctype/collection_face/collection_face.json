@@ -1,0 +1,64 @@
+{
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:face_id",
+ "creation": "2024-06-04 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "fields": [
+  {
+   "fieldname": "face_id",
+   "fieldtype": "Data",
+   "label": "Face ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "parent",
+   "fieldtype": "Link",
+   "label": "Parent Collection",
+   "options": "Collection",
+   "hidden": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "parentfield",
+   "fieldtype": "Data",
+   "label": "Parent Field",
+   "hidden": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "parenttype",
+   "fieldtype": "Data",
+   "label": "Parent Type",
+   "hidden": 1,
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 0,
+ "links": [],
+ "modified": "2024-06-04 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Face Recognition",
+ "name": "Collection Face",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "face_id"
+}
