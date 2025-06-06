@@ -226,12 +226,11 @@ def enroll_single_student_face(collection_name, student_id, image_file_url):
         frappe.throw(f"An unexpected error occurred during face enrollment for {display_student_name}: {e}")
 
 @frappe.whitelist()
-def get_students_in_group_for_query(filters):
+def get_students_in_group_for_query(student_group_name):
     """
     Returns a list of students belonging to a specific student group,
-    filtered by search text, for use in Link field queries.
+    for use in Select field options.
     """
-    student_group_name = filters.get("student_group")
     if not student_group_name:
         return []
 
@@ -239,16 +238,8 @@ def get_students_in_group_for_query(filters):
         student_group_doc = frappe.get_doc("Student Group", student_group_name)
         students_in_group = student_group_doc.get_students_in_group()
 
-        filtered_students = []
-        for student_data in students_in_group:
-            student_doc_name = student_data.get("name") # This is the actual student ID (name field)
-            student_display_name = student_data.get("student_name") # This is the display name
-
-            # Perform case-insensitive search
-            if txt.lower() in student_doc_name.lower() or txt.lower() in student_display_name.lower():
-                filtered_students.append([student_doc_name, student_display_name])
-
-        return filtered_students
+        # Return all students in the group as [value, label] pairs
+        return [[s.get("name"), s.get("student_name")] for s in students_in_group]
 
     except Exception as e:
         frappe.log_error(f"Error fetching students for student group {student_group_name}: {e}", "Face Recognition Attendance")

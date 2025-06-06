@@ -75,9 +75,7 @@ frappe.ui.form.on('Face Recognition Attendance', {
                     frappe.call({
                         method: 'face_recognition.face_recognition.doctype.face_recognition_attendance.face_recognition_attendance.get_students_in_group_for_query',
                         args: {
-                            filters: {
-                                "student_group": frm.doc.student_group
-                            }
+                            student_group_name: frm.doc.student_group
                         },
                         callback: function(r) {
                             if (r.message) {
