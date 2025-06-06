@@ -35,8 +35,9 @@ frappe.ui.form.on('Face Recognition Attendance', {
                         reqd: 1,
                         get_query: function() {
                             return {
+                                query: "face_recognition.face_recognition.doctype.face_recognition_attendance.face_recognition_attendance.get_students_in_group_for_query",
                                 filters: {
-                                    'student_group': frm.doc.student_group
+                                    "student_group": frm.doc.student_group
                                 }
                             };
                         }
