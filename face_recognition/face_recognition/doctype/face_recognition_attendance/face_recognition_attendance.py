@@ -179,7 +179,7 @@ def get_latest_file_doc_name_by_url(file_url):
         return None
 
 @frappe.whitelist()
-def enroll_single_student_face(collection_name, student_name, image_file_url):
+def enroll_single_student_face(collection_name, student_id, image_file_url):
     """
     Enrolls a single student's face into the specified collection.
     This function is called from the client-side (JS) for individual student enrollment.
@@ -206,17 +206,21 @@ def enroll_single_student_face(collection_name, student_name, image_file_url):
         with open(file_path_abs, "rb") as f:
             file_content = f.read()
 
+        student_doc = frappe.get_doc("Student", student_id)
+        person_name_for_server = student_doc.name # Use the actual student ID for the server
+        display_student_name = student_doc.student_name # Use the display name for messages
+
         files = {
             "file": (file_doc.file_name, file_content, file_doc.file_type),
-            "person_name": (None, student_name)
+            "person_name": (None, person_name_for_server)
         }
 
         response = requests.post(enroll_endpoint, headers=headers, files=files)
         response.raise_for_status()
         
-        return {"message": f"Successfully enrolled {student_name} into collection {collection_name}."}
+        return {"message": f"Successfully enrolled {display_student_name} into collection {collection_name}."}
 
     except requests.exceptions.RequestException as e:
         frappe.throw(f"Error connecting to face recognition server: {e}")
     except Exception as e:
-        frappe.throw(f"An unexpected error occurred during face enrollment for {student_name}: {e}")
+        frappe.throw(f"An unexpected error occurred during face enrollment for {display_student_name}: {e}")

@@ -63,7 +63,7 @@ frappe.ui.form.on('Face Recognition Attendance', {
                         method: 'face_recognition.face_recognition.doctype.face_recognition_attendance.face_recognition_attendance.enroll_single_student_face',
                         args: {
                             collection_name: frm.doc.collection,
-                            student_name: values.student, // This will be the student's name (title field)
+                            student_id: values.student, // This will be the student's unique ID (name field)
                             image_file_url: values.image_file
                         },
                         callback: function(r) {
