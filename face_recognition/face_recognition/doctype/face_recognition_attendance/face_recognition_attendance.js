@@ -30,17 +30,9 @@ frappe.ui.form.on('Face Recognition Attendance', {
                     {
                         label: __('Student'),
                         fieldname: 'student',
-                        fieldtype: 'Link',
-                        options: 'Student',
-                        reqd: 1,
-                        get_query: function() {
-                            return {
-                                query: "face_recognition.face_recognition.doctype.face_recognition_attendance.face_recognition_attendance.get_students_in_group_for_query",
-                                filters: {
-                                    "student_group": frm.doc.student_group
-                                }
-                            };
-                        }
+                        fieldtype: 'Select', // Changed to Select
+                        options: [], // Will be populated dynamically
+                        reqd: 1
                     },
                     {
                         label: __('Upload Image'),
@@ -76,6 +68,30 @@ frappe.ui.form.on('Face Recognition Attendance', {
                     });
                 }
             });
+
+            // Populate student options when dialog is shown
+            d.on_page_show = function() {
+                if (frm.doc.student_group) {
+                    frappe.call({
+                        method: 'face_recognition.face_recognition.doctype.face_recognition_attendance.face_recognition_attendance.get_students_in_group_for_query',
+                        args: {
+                            filters: {
+                                "student_group": frm.doc.student_group
+                            }
+                        },
+                        callback: function(r) {
+                            if (r.message) {
+                                let student_options = r.message.map(s => ({ label: s[1], value: s[0] }));
+                                d.set_df_property('student', 'options', student_options);
+                            } else {
+                                frappe.msgprint(__('No students found in the selected Student Group.'));
+                            }
+                        }
+                    });
+                } else {
+                    frappe.msgprint(__('Please select a Student Group first to load students.'));
+                }
+            };
             d.show();
         }, __('Actions'));
 

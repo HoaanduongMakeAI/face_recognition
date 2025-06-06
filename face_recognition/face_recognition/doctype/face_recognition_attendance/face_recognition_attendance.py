@@ -226,7 +226,7 @@ def enroll_single_student_face(collection_name, student_id, image_file_url):
         frappe.throw(f"An unexpected error occurred during face enrollment for {display_student_name}: {e}")
 
 @frappe.whitelist()
-def get_students_in_group_for_query(doctype, txt, searchfield, filters):
+def get_students_in_group_for_query(filters):
     """
     Returns a list of students belonging to a specific student group,
     filtered by search text, for use in Link field queries.
