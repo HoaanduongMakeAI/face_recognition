@@ -236,10 +236,10 @@ def get_students_in_group_for_query(student_group_name):
 
     try:
         student_group_doc = frappe.get_doc("Student Group", student_group_name)
-        students_in_group = student_group_doc.get_students_in_group()
+        students_in_group = student_group_doc.students
 
         # Return all students in the group as [value, label] pairs
-        return [[s.get("name"), s.get("student_name")] for s in students_in_group]
+        return [[s.student, s.student_name] for s in students_in_group]
 
     except Exception as e:
         frappe.log_error(f"Error fetching students for student group {student_group_name}: {e}", "Face Recognition Attendance")
