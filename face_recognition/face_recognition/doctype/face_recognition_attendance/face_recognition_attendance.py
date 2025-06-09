@@ -131,23 +131,26 @@ class FaceRecognitionAttendance(Document):
                 student_name_from_db = frappe.db.get_value("Student", {"name": person_name}, "name")
                 
                 if student_name_from_db:
-                    # Check if attendance already marked for today
-                    existing_attendance = frappe.db.exists(
-                        "Student Attendance",
-                        {"student": student_name_from_db, "date": today, "student_group": student_group_name}
-                    )
+                    try:
+                        # Check if attendance already marked for today
+                        existing_attendance = frappe.db.exists(
+                            "Student Attendance",
+                            {"student": student_name_from_db, "date": today, "student_group": student_group_name}
+                        )
 
-                    if not existing_attendance:
-                        attendance_doc = frappe.new_doc("Student Attendance")
-                        attendance_doc.student = student_name_from_db
-                        attendance_doc.student_group = student_group_name
-                        attendance_doc.date = today
-                        attendance_doc.status = "Present"
-                        attendance_doc.save(ignore_permissions=True)
-                        attendance_doc.submit()
-                        marked_students.append(person_name)
-                    else:
-                        frappe.msgprint(f"Attendance for {person_name} already marked as {existing_attendance.status} for today.")
+                        if not existing_attendance:
+                            attendance_doc = frappe.new_doc("Student Attendance")
+                            attendance_doc.student = student_name_from_db
+                            attendance_doc.student_group = student_group_name
+                            attendance_doc.date = today
+                            attendance_doc.status = "Present"
+                            attendance_doc.save(ignore_permissions=True)
+                            attendance_doc.submit()
+                            marked_students.append(person_name)
+                        else:
+                            frappe.msgprint(f"Attendance for {person_name} already marked as {existing_attendance.status} for today.")
+                    except:
+                        pass
                 else:
                     frappe.msgprint(f"Student with name {person_name} not found in ERPNext.")
 
