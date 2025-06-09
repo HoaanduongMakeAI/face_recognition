@@ -4,6 +4,7 @@ import requests
 import json
 import os
 from frappe.utils import get_files_path
+from face_recognition.face_recognition.doctype.collection.collection import Collection
 
 class FaceRecognitionAttendance(Document):
     def get_server_settings(self):
@@ -63,6 +64,11 @@ class FaceRecognitionAttendance(Document):
 
                 response = requests.post(enroll_endpoint, headers=headers, files=files)
                 response.raise_for_status()
+                
+                # Sync faces for the collection after successful enrollment
+                collection_doc = frappe.get_doc("Collection", collection_name)
+                collection_doc.sync_faces_from_server()
+
                 enrolled_count += 1
                 frappe.msgprint(f"Successfully enrolled {person_name}.")
 
@@ -122,7 +128,7 @@ class FaceRecognitionAttendance(Document):
                 person_name = face.get("name")
                 
                 # Find student by name (this might need a more robust lookup, e.g., by a unique ID)
-                student_name_from_db = frappe.db.get_value("Student", {"student_name": person_name}, "name")
+                student_name_from_db = frappe.db.get_value("Student", {"name": person_name}, "name")
                 
                 if student_name_from_db:
                     # Check if attendance already marked for today
@@ -217,6 +223,10 @@ def enroll_single_student_face(collection_name, student_id, image_file_url):
 
         response = requests.post(enroll_endpoint, headers=headers, files=files)
         response.raise_for_status()
+        
+        # Sync faces for the collection after successful enrollment
+        collection_doc = frappe.get_doc("Collection", collection_name)
+        collection_doc.sync_faces_from_server()
         
         return {"message": f"Successfully enrolled {display_student_name} into collection {collection_name}."}
 
